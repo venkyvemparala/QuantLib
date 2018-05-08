@@ -17,22 +17,22 @@ env:
     - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
       CONFIGURE_FLAGS="--disable-static --enable-intraday"
-      CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Werror"
+      CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -Werror"
     # Indexed coupons enabled
     - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
       CONFIGURE_FLAGS="--disable-static --enable-indexed-coupons"
-      CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Werror"
+      CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -Werror"
     # Negative rates disabled
     - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
       CONFIGURE_FLAGS="--disable-static --disable-negative-rates"
-      CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Werror"
+      CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -Werror"
     # Thread-safe observe enabled
     - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
       CONFIGURE_FLAGS="--disable-static --enable-thread-safe-observer-pattern"
-      CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Werror"
+      CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -Werror"
 
 before_install:
   - docker pull ${DOCKER_IMAGE}
