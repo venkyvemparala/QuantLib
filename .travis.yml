@@ -14,22 +14,22 @@ env:
     - DOCKER_OPTS="--rm -ti -v ${HOME}/.ccache:/root/.ccache -v ${TRAVIS_BUILD_DIR}:/build -w /build"
   matrix:
     # Intraday calculations enabled
-    - DOCKER_IMAGE=lballabio/quantlib-devenv:xenial
+    - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
       CONFIGURE_FLAGS="--disable-static --enable-intraday"
       CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Werror"
     # Indexed coupons enabled
-    - DOCKER_IMAGE=lballabio/quantlib-devenv:xenial
+    - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
       CONFIGURE_FLAGS="--disable-static --enable-indexed-coupons"
       CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Werror"
     # Negative rates disabled
-    - DOCKER_IMAGE=lballabio/quantlib-devenv:xenial
+    - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
       CONFIGURE_FLAGS="--disable-static --disable-negative-rates"
       CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Werror"
     # Thread-safe observe enabled
-    - DOCKER_IMAGE=lballabio/quantlib-devenv:xenial
+    - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
       CONFIGURE_FLAGS="--disable-static --enable-thread-safe-observer-pattern"
       CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Werror"
