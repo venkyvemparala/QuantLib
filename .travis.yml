@@ -28,11 +28,16 @@ env:
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
       CONFIGURE_FLAGS="--disable-static --disable-negative-rates"
       CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -Werror"
-    # Thread-safe observe enabled
+    # Thread-safe observer enabled
     - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
       CONFIGURE_FLAGS="--disable-static --enable-thread-safe-observer-pattern"
       CXXFLAGS="-O2 -Wall -Wno-unknown-pragmas -Wno-deprecated-declarations -Werror"
+    # C++11 pointers enabled
+    - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
+      CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
+      CONFIGURE_FLAGS="--disable-static --enable-std-pointers --enable-std-unique-ptr"
+      CXXFLAGS="-O2 -std=c++11 -Wall -Wno-unknown-pragmas -Werror"
 
 before_install:
   - docker pull ${DOCKER_IMAGE}
