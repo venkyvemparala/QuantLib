@@ -21,11 +21,7 @@
 #include <ql/termstructures/yield/oisratehelper.hpp>
 #include <ql/instruments/makeois.hpp>
 #include <ql/pricingengines/swap/discountingswapengine.hpp>
-#include <ql/cashflows/floatingratecoupon.hpp>
-
 #include <ql/utilities/null_deleter.hpp>
-
-using boost::shared_ptr;
 
 namespace QuantLib {
 
@@ -33,7 +29,7 @@ namespace QuantLib {
                     Natural settlementDays,
                     const Period& tenor, // swap maturity
                     const Handle<Quote>& fixedRate,
-                    const boost::shared_ptr<OvernightIndex>& overnightIndex,
+                    const ext::shared_ptr<OvernightIndex>& overnightIndex,
                     const Handle<YieldTermStructure>& discount,
                     bool telescopicValueDates,
                     Natural paymentLag,
@@ -59,10 +55,10 @@ namespace QuantLib {
 
         // dummy OvernightIndex with curve/swap arguments
         // review here
-        boost::shared_ptr<IborIndex> clonedIborIndex =
+        ext::shared_ptr<IborIndex> clonedIborIndex =
             overnightIndex_->clone(termStructureHandle_);
-        shared_ptr<OvernightIndex> clonedOvernightIndex =
-            boost::dynamic_pointer_cast<OvernightIndex>(clonedIborIndex);
+        ext::shared_ptr<OvernightIndex> clonedOvernightIndex =
+            ext::dynamic_pointer_cast<OvernightIndex>(clonedIborIndex);
 
         // input discount curve Handle might be empty now but it could
         //    be assigned a curve later; use a RelinkableHandle here
@@ -85,7 +81,7 @@ namespace QuantLib {
         // force recalculation when needed
         bool observer = false;
 
-        shared_ptr<YieldTermStructure> temp(t, null_deleter());
+        ext::shared_ptr<YieldTermStructure> temp(t, null_deleter());
         termStructureHandle_.linkTo(temp, observer);
 
         if (discountHandle_.empty())
@@ -99,7 +95,7 @@ namespace QuantLib {
     Real OISRateHelper::impliedQuote() const {
         QL_REQUIRE(termStructure_ != 0, "term structure not set");
         // we didn't register as observers - force calculation
-        swap_->deepUpdate();
+        swap_->recalculate();
         return swap_->fairRate();
     }
 
@@ -116,7 +112,7 @@ namespace QuantLib {
                     const Date& startDate,
                     const Date& endDate,
                     const Handle<Quote>& fixedRate,
-                    const boost::shared_ptr<OvernightIndex>& overnightIndex,
+                    const ext::shared_ptr<OvernightIndex>& overnightIndex,
                     const Handle<YieldTermStructure>& discount,
                     bool telescopicValueDates)
         : RateHelper(fixedRate), discountHandle_(discount),
@@ -127,10 +123,10 @@ namespace QuantLib {
 
         // dummy OvernightIndex with curve/swap arguments
         // review here
-        boost::shared_ptr<IborIndex> clonedIborIndex =
+        ext::shared_ptr<IborIndex> clonedIborIndex =
             overnightIndex->clone(termStructureHandle_);
-        shared_ptr<OvernightIndex> clonedOvernightIndex =
-            boost::dynamic_pointer_cast<OvernightIndex>(clonedIborIndex);
+        ext::shared_ptr<OvernightIndex> clonedOvernightIndex =
+            ext::dynamic_pointer_cast<OvernightIndex>(clonedIborIndex);
 
         // input discount curve Handle might be empty now but it could
         //    be assigned a curve later; use a RelinkableHandle here
@@ -149,7 +145,7 @@ namespace QuantLib {
         // force recalculation when needed
         bool observer = false;
 
-        shared_ptr<YieldTermStructure> temp(t, null_deleter());
+        ext::shared_ptr<YieldTermStructure> temp(t, null_deleter());
         termStructureHandle_.linkTo(temp, observer);
 
         if (discountHandle_.empty())
