@@ -53,8 +53,8 @@
 #include <ql/math/optimization/differentialevolution.hpp>
 #include <ql/time/period.hpp>
 #include <ql/quotes/simplequote.hpp>
-#include <ql/experimental/math/numericaldifferentiation.hpp>
 #include <ql/experimental/exoticoptions/analyticpdfhestonengine.hpp>
+#include <ql/methods/finitedifferences/operators/numericaldifferentiation.hpp>
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -1365,7 +1365,7 @@ void HestonModelTest::testAnalyticPDFHestonEngine() {
 		ext::make_shared<AnalyticPDFHestonEngine>(model, tol));
 
     const ext::shared_ptr<PricingEngine> analyticEngine(
-		ext::make_shared<AnalyticHestonEngine>(model, 192));
+		ext::make_shared<AnalyticHestonEngine>(model, 178));
 
     const Date maturityDate(5, July, 2014);
     const Time maturity = dayCounter.yearFraction(settlementDate, maturityDate);
@@ -2152,7 +2152,7 @@ void HestonModelTest::testAndersenPiterbargPricing() {
     };
 
     const ext::shared_ptr<PricingEngine> analyticEngine(
-        ext::make_shared<AnalyticHestonEngine>(model, 192));
+        ext::make_shared<AnalyticHestonEngine>(model, 178));
 
     const Date maturityDates[] = {
         settlementDate + Period(1, Days),
@@ -2164,7 +2164,7 @@ void HestonModelTest::testAndersenPiterbargPricing() {
     const Option::Type optionTypes[] = { Option::Call, Option::Put };
     const Real strikes[] = { 50, 75, 90, 100, 110, 130, 150, 200};
 
-    const Real tol = 1e-8;
+    const Real tol = 1e-7;
 
     for (Size u=0; u < LENGTH(maturityDates); ++u) {
         const ext::shared_ptr<Exercise> exercise =
