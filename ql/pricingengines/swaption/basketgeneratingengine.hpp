@@ -62,7 +62,7 @@ namespace QuantLib {
             MaturityStrikeByDeltaGamma
         } CalibrationBasketType;
 
-        Disposable<std::vector<ext::shared_ptr<CalibrationHelper> > >
+        Disposable<std::vector<ext::shared_ptr<BlackCalibrationHelper> > >
         calibrationBasket(
             const ext::shared_ptr<Exercise> &exercise,
             ext::shared_ptr<SwapIndex> standardSwapBase,
@@ -73,6 +73,12 @@ namespace QuantLib {
       protected:
 
         BasketGeneratingEngine(const ext::shared_ptr<Gaussian1dModel> &model,
+                               const Handle<Quote> &oas,
+                               const Handle<YieldTermStructure> &discountCurve)
+            : onefactormodel_(model), oas_(oas), discountCurve_(discountCurve) {
+        }
+
+        BasketGeneratingEngine(const Handle<Gaussian1dModel> &model,
                                const Handle<Quote> &oas,
                                const Handle<YieldTermStructure> &discountCurve)
             : onefactormodel_(model), oas_(oas), discountCurve_(discountCurve) {
@@ -93,7 +99,7 @@ namespace QuantLib {
 
       private:
 
-        const ext::shared_ptr<Gaussian1dModel> onefactormodel_;
+        const Handle<Gaussian1dModel> onefactormodel_;
         const Handle<Quote> oas_;
         const Handle<YieldTermStructure> discountCurve_;
 

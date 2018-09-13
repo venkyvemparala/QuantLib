@@ -47,6 +47,8 @@ namespace QuantLib {
         values (if required) is in place.
 
         \ingroup interpolations
+        \warning See the Interpolation class for information about the
+                 required lifetime of the underlying data.
     */
     template <class I1, class I2>
     class ConvexMonotoneInterpolation : public Interpolation {
@@ -619,8 +621,8 @@ namespace QuantLib {
             for (Size i=startPoint; i<length_-1; ++i) {
                 Real dxPrev = this->xBegin_[i] - this->xBegin_[i-1];
                 Real dx = this->xBegin_[i+1] - this->xBegin_[i];
-                f[i] = dxPrev/(dx+dxPrev) * this->yBegin_[i]
-                     + dx/(dx+dxPrev) * this->yBegin_[i+1];
+                f[i] = dx/(dx+dxPrev) * this->yBegin_[i]
+                     + dxPrev/(dx+dxPrev) * this->yBegin_[i+1];
             }
 
             if (startPoint > 1)

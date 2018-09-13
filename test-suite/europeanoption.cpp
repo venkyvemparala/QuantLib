@@ -36,6 +36,7 @@
 #include <ql/pricingengines/vanilla/integralengine.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
 #include <ql/termstructures/yield/zerocurve.hpp>
+#include <ql/termstructures/yield/forwardcurve.hpp>
 #include <ql/termstructures/volatility/equityfx/blackconstantvol.hpp>
 #include <ql/termstructures/volatility/equityfx/blackvariancesurface.hpp>
 #include <ql/utilities/dataformatters.hpp>
@@ -1616,6 +1617,10 @@ void EuropeanOptionTest::testPDESchemes() {
         ext::make_shared<FdBlackScholesVanillaEngine>(
             process, 15, 100, 0, FdmSchemeDesc::ModifiedCraigSneyd());
 
+    const ext::shared_ptr<PricingEngine> trBDF2 =
+        ext::make_shared<FdBlackScholesVanillaEngine>(
+            process, 15, 100, 0, FdmSchemeDesc::TrBDF2());
+
     const std::pair<ext::shared_ptr<PricingEngine>, std::string> engines[]= {
         std::make_pair(crankNicolson, "Crank-Nicolson"),
         std::make_pair(implicitEuler, "Implicit-Euler"),
@@ -1623,7 +1628,8 @@ void EuropeanOptionTest::testPDESchemes() {
         std::make_pair(methodOfLines, "Method-of-Lines"),
         std::make_pair(hundsdorfer, "Hundsdorfer"),
         std::make_pair(craigSneyd, "Craig-Sneyd"),
-        std::make_pair(modCraigSneyd, "Modified Craig-Sneyd")
+        std::make_pair(modCraigSneyd, "Modified Craig-Sneyd"),
+        std::make_pair(trBDF2, "TR-BDF2")
     };
 
     const Size nEngines = LENGTH(engines);
@@ -1686,6 +1692,65 @@ void EuropeanOptionTest::testPDESchemes() {
     }
 }
 
+void EuropeanOptionTest::testFdEngineWithNonConstantParameters() {
+    BOOST_TEST_MESSAGE("Testing finite-difference European engine "
+                       "with non-constant parameters...");
+
+    SavedSettings backup;
+
+    Real u = 190.0;
+    Volatility v = 0.20;
+
+    DayCounter dc = Actual360();
+    Date today = Settings::instance().evaluationDate();
+
+    ext::shared_ptr<SimpleQuote> spot(new SimpleQuote(u));
+    ext::shared_ptr<BlackVolTermStructure> volTS = flatVol(today,v,dc);
+
+    std::vector<Date> dates(5);
+    std::vector<Rate> rates(5);
+    dates[0] = today;     rates[0] = 0.0;
+    dates[1] = today+90;  rates[1] = 0.001;
+    dates[2] = today+180; rates[2] = 0.002;
+    dates[3] = today+270; rates[3] = 0.005;
+    dates[4] = today+360; rates[4] = 0.01;
+    ext::shared_ptr<YieldTermStructure> rTS =
+        ext::make_shared<ForwardCurve>(dates, rates, dc);
+    Rate r = rTS->zeroRate(dates[4], dc, Continuous);
+
+    ext::shared_ptr<BlackScholesProcess> process =
+        ext::make_shared<BlackScholesProcess>(Handle<Quote>(spot),
+                                              Handle<YieldTermStructure>(rTS),
+                                              Handle<BlackVolTermStructure>(volTS));
+    
+    ext::shared_ptr<Exercise> exercise =
+        ext::make_shared<EuropeanExercise>(today + 360);
+    ext::shared_ptr<StrikedTypePayoff> payoff =
+        ext::make_shared<PlainVanillaPayoff>(Option::Call, 190.0);
+
+    EuropeanOption option(payoff, exercise);
+
+    option.setPricingEngine(ext::make_shared<AnalyticEuropeanEngine>(process));
+    Real expected = option.NPV();
+
+    Size timeSteps = 200;
+    Size gridPoints = 201;
+    bool timeDependent = false;
+    option.setPricingEngine(ext::make_shared<FDEuropeanEngine<CrankNicolson> >(
+                              process, timeSteps, gridPoints, timeDependent));
+    Real calculated = option.NPV();
+
+    Real tolerance = 0.01;
+    Real error = std::fabs(expected-calculated);
+    if (error > tolerance) {
+        REPORT_FAILURE("value", payoff, exercise,
+                       u, 0.0, r, today, v,
+                       expected, calculated,
+                       error, tolerance);
+    }
+}
+
+
 
 test_suite* EuropeanOptionTest::suite() {
     test_suite* suite = BOOST_TEST_SUITE("European option tests");
@@ -1705,20 +1770,19 @@ test_suite* EuropeanOptionTest::suite() {
     suite->add(QUANTLIB_TEST_CASE(&EuropeanOptionTest::testLRBinomialEngines));
     suite->add(QUANTLIB_TEST_CASE(
                               &EuropeanOptionTest::testJOSHIBinomialEngines));
-    // FLOATING_POINT_EXCEPTION
     suite->add(QUANTLIB_TEST_CASE(&EuropeanOptionTest::testFdEngines));
     suite->add(QUANTLIB_TEST_CASE(&EuropeanOptionTest::testIntegralEngines));
     suite->add(QUANTLIB_TEST_CASE(&EuropeanOptionTest::testMcEngines));
     suite->add(QUANTLIB_TEST_CASE(&EuropeanOptionTest::testQmcEngines));
 
-    // FLOATING_POINT_EXCEPTION
     suite->add(QUANTLIB_TEST_CASE(&EuropeanOptionTest::testPriceCurve));
     suite->add(QUANTLIB_TEST_CASE(&EuropeanOptionTest::testLocalVolatility));
 
     suite->add(QUANTLIB_TEST_CASE(
                        &EuropeanOptionTest::testAnalyticEngineDiscountCurve));
     suite->add(QUANTLIB_TEST_CASE(&EuropeanOptionTest::testPDESchemes));
-
+    suite->add(QUANTLIB_TEST_CASE(
+                 &EuropeanOptionTest::testFdEngineWithNonConstantParameters));
     return suite;
 }
 

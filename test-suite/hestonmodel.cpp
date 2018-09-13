@@ -53,8 +53,8 @@
 #include <ql/math/optimization/differentialevolution.hpp>
 #include <ql/time/period.hpp>
 #include <ql/quotes/simplequote.hpp>
-#include <ql/experimental/math/numericaldifferentiation.hpp>
 #include <ql/experimental/exoticoptions/analyticpdfhestonengine.hpp>
+#include <ql/methods/finitedifferences/operators/numericaldifferentiation.hpp>
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -66,7 +66,7 @@ namespace {
     struct CalibrationMarketData {
         Handle<Quote> s0;
         Handle<YieldTermStructure> riskFreeTS, dividendYield;
-        std::vector<ext::shared_ptr<CalibrationHelper> > options;
+        std::vector<ext::shared_ptr<BlackCalibrationHelper> > options;
     };
 
     CalibrationMarketData getDAXCalibrationMarketData() {
@@ -119,7 +119,7 @@ namespace {
         Real strike[] = { 3400,3600,3800,4000,4200,4400,
                           4500,4600,4800,5000,5200,5400,5600 };
         
-        std::vector<ext::shared_ptr<CalibrationHelper> > options;
+        std::vector<ext::shared_ptr<BlackCalibrationHelper> > options;
         
         for (Size s = 0; s < 13; ++s) {
             for (Size m = 0; m < 8; ++m) {
@@ -129,7 +129,7 @@ namespace {
                 options.push_back(ext::make_shared<HestonModelHelper>(maturity, calendar,
                                               s0, strike[s], vol,
                                               riskFreeTS, dividendYield,
-                                          CalibrationHelper::ImpliedVolError));
+                                          BlackCalibrationHelper::ImpliedVolError));
             }
         }
         
@@ -170,7 +170,7 @@ void HestonModelTest::testBlackCalibration() {
     optionMaturities.push_back(Period(1, Years));
     optionMaturities.push_back(Period(2, Years));
 
-    std::vector<ext::shared_ptr<CalibrationHelper> > options;
+    std::vector<ext::shared_ptr<BlackCalibrationHelper> > options;
     Handle<Quote> s0(ext::make_shared<SimpleQuote>(1.0));
     Handle<Quote> vol(ext::make_shared<SimpleQuote>(0.1));
     Volatility volatility = vol->value();
@@ -255,7 +255,7 @@ void HestonModelTest::testDAXCalibration() {
     const Handle<YieldTermStructure> dividendTS = marketData.dividendYield;
     const Handle<Quote> s0 = marketData.s0;
 
-    const std::vector<ext::shared_ptr<CalibrationHelper> > options
+    const std::vector<ext::shared_ptr<BlackCalibrationHelper> > options
                                                     = marketData.options;
 
     const Real v0=0.1;
@@ -1167,7 +1167,7 @@ void HestonModelTest::testDAXCalibrationOfTimeDependentModel() {
     const Handle<YieldTermStructure> dividendTS = marketData.dividendYield;
     const Handle<Quote> s0 = marketData.s0;
 
-    const std::vector<ext::shared_ptr<CalibrationHelper> > options
+    const std::vector<ext::shared_ptr<BlackCalibrationHelper> > options
                                                     = marketData.options;
 
     std::vector<Time> modelTimes;
@@ -1365,7 +1365,7 @@ void HestonModelTest::testAnalyticPDFHestonEngine() {
 		ext::make_shared<AnalyticPDFHestonEngine>(model, tol));
 
     const ext::shared_ptr<PricingEngine> analyticEngine(
-		ext::make_shared<AnalyticHestonEngine>(model, 192));
+		ext::make_shared<AnalyticHestonEngine>(model, 178));
 
     const Date maturityDate(5, July, 2014);
     const Time maturity = dayCounter.yearFraction(settlementDate, maturityDate);
@@ -2152,7 +2152,7 @@ void HestonModelTest::testAndersenPiterbargPricing() {
     };
 
     const ext::shared_ptr<PricingEngine> analyticEngine(
-        ext::make_shared<AnalyticHestonEngine>(model, 192));
+        ext::make_shared<AnalyticHestonEngine>(model, 178));
 
     const Date maturityDates[] = {
         settlementDate + Period(1, Days),
@@ -2164,7 +2164,7 @@ void HestonModelTest::testAndersenPiterbargPricing() {
     const Option::Type optionTypes[] = { Option::Call, Option::Put };
     const Real strikes[] = { 50, 75, 90, 100, 110, 130, 150, 200};
 
-    const Real tol = 1e-8;
+    const Real tol = 1e-7;
 
     for (Size u=0; u < LENGTH(maturityDates); ++u) {
         const ext::shared_ptr<Exercise> exercise =
