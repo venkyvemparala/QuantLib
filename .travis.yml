@@ -36,7 +36,7 @@ env:
     # C++11 pointers enabled
     - DOCKER_IMAGE=lballabio/quantlib-devenv:bionic
       CACHEDCC="ccache gcc" CACHEDCXX="ccache g++"
-      CONFIGURE_FLAGS="--disable-static --enable-std-pointers --enable-std-unique-ptr"
+      CONFIGURE_FLAGS="--disable-static --enable-std-pointers --enable-std-unique-ptr --enable-std-function"
       CXXFLAGS="-O2 -std=c++11 -Wall -Wno-unknown-pragmas -Werror"
 
 before_install:
