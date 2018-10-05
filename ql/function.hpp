@@ -1,7 +1,7 @@
 /* -*- mode: c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 /*
- Copyright (C) 2003 RiskMap srl
+ Copyright (C) 2018 StatPro Italia srl
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -17,27 +17,35 @@
  FOR A PARTICULAR PURPOSE.  See the license for more details.
 */
 
-#ifndef quantlib_test_day_counters_hpp
-#define quantlib_test_day_counters_hpp
+/*! \file function.hpp
+    \brief Maps function to either the boost or std implementation
+*/
 
-#include <boost/test/unit_test.hpp>
+#ifndef quantlib_function_hpp
+#define quantlib_function_hpp
 
-/* remember to document new and/or updated tests in the Doxygen
-   comment block of the corresponding class */
+#include <ql/qldefines.hpp>
 
-class DayCounterTest {
-   public:
-    static void testActualActual();
-    static void testActualActualWithSchedule();
-    static void testSimple();
-    static void testOne();
-    static void testBusiness252();
-    static void testThirty360_BondBasis();
-    static void testThirty360_EurobondBasis();
-    static void testActual365_Canadian();
-    static void testIntraday();
-    static boost::unit_test_framework::test_suite* suite();
-};
+#if defined(QL_USE_STD_FUNCTION)
+#include <functional>
+#else
+#include <boost/function.hpp>
+#endif
+
+namespace QuantLib {
+
+    namespace ext {
+
+        #if defined(QL_USE_STD_FUNCTION)
+        using std::function;
+        #else
+        using boost::function;
+        #endif
+
+    }
+
+}
 
 
 #endif
+
