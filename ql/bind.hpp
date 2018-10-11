@@ -1,7 +1,7 @@
 /* -*- mode: c++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
 /*
- Copyright (C) 2015 Peter Caspers
+ Copyright (C) 2018 StatPro Italia srl
 
  This file is part of QuantLib, a free-software/open-source library
  for financial quantitative analysts and developers - http://quantlib.org/
@@ -17,24 +17,44 @@
  FOR A PARTICULAR PURPOSE.  See the license for more details.
 */
 
-#include <ql/experimental/math/piecewiseintegral.hpp>
-#include <algorithm>
+/*! \file bind.hpp
+    \brief Maps bind to either the boost or std implementation
+*/
+
+#ifndef quantlib_bind_hpp
+#define quantlib_bind_hpp
+
+#include <ql/qldefines.hpp>
+
+#if defined(QL_USE_STD_BIND)
+#include <functional>
+#else
+#include <boost/bind.hpp>
+#include <boost/ref.hpp>
+#endif
 
 namespace QuantLib {
 
-PiecewiseIntegral::PiecewiseIntegral(
-    const ext::shared_ptr<Integrator> &integrator,
-    const std::vector<Real> &criticalPoints, const bool avoidCriticalPoints)
-    : Integrator(1.0, 1), integrator_(integrator),
-      criticalPoints_(criticalPoints),
-      eps_(avoidCriticalPoints ? (1.0 + QL_EPSILON) : 1.0) {
+    namespace ext {
 
-    std::sort(criticalPoints_.begin(), criticalPoints_.end());
-    std::vector<Real>::const_iterator end =
-        std::unique(criticalPoints_.begin(), criticalPoints_.end(),
-                    static_cast<bool (*)(Real, Real)>(close_enough));
-    criticalPoints_.resize(end - criticalPoints_.begin());
+        #if defined(QL_USE_STD_BIND)
+        using std::bind;
+        using std::ref;
+        using std::cref;
+        namespace placeholders {
+            using namespace std::placeholders;
+        }
+        #else
+        using boost::bind;
+        using boost::ref;
+        using boost::cref;
+        namespace placeholders {}
+        #endif
+
+    }
 
 }
 
-} // namespace QuantLib
+
+#endif
+
